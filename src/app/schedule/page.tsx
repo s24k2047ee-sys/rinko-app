@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import ScheduleClient from "./ScheduleClient";
 
 export default async function SchedulePage() {

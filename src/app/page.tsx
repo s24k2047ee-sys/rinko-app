@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { BookOpen, CheckSquare, Calendar, MessageSquare, PenTool, FileText, ChevronRight } from "lucide-react";
 import { format } from "date-fns";

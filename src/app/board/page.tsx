@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import BoardClient from "./BoardClient";
 
 export default async function BoardPage() {

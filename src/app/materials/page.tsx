@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import { FileText, Download, UploadCloud, Folder } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
