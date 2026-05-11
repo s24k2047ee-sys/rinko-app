@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Book as BookIcon, Plus, Search, MoreVertical } from "lucide-react";
+import AddBookModal from "./AddBookModal";
 
 interface Book {
   id: number;
@@ -14,6 +15,7 @@ interface Book {
 
 export default function BooksClient({ initialBooks }: { initialBooks: Book[] }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const filteredBooks = initialBooks.filter(book => 
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -33,10 +35,15 @@ export default function BooksClient({ initialBooks }: { initialBooks: Book[] }) 
             className="w-full bg-gray-800 border border-gray-700 text-sm text-white rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
           />
         </div>
-        <button className="bg-emerald-600 hover:bg-emerald-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95"
+        >
           <Plus size={20} />
         </button>
       </div>
+
+      <AddBookModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       <div className="space-y-4">
         {filteredBooks.length > 0 ? (
