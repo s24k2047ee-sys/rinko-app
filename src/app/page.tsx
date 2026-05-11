@@ -1,65 +1,108 @@
-import Image from "next/image";
+import prisma from "@/lib/prisma";
+import Link from "next/link";
+import { BookOpen, CheckSquare, Calendar, MessageSquare, PenTool, FileText, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 
-export default function Home() {
+const quickLinks = [
+  { name: "書籍", href: "/books", icon: BookOpen, desc: "輪講書籍の共有・登録", color: "text-blue-400", bg: "bg-blue-400/10" },
+  { name: "進捗", href: "/progress", icon: CheckSquare, desc: "担当範囲と読了管理", color: "text-emerald-400", bg: "bg-emerald-400/10" },
+  { name: "日程", href: "/schedule", icon: Calendar, desc: "ローテーションカレンダー", color: "text-purple-400", bg: "bg-purple-400/10" },
+  { name: "Q&A", href: "/board", icon: MessageSquare, desc: "事前質問・スレッド", color: "text-orange-400", bg: "bg-orange-400/10" },
+  { name: "メモ", href: "/editor", icon: PenTool, desc: "マークダウンエディタ", color: "text-pink-400", bg: "bg-pink-400/10" },
+  { name: "資料", href: "/materials", icon: FileText, desc: "レジュメ・PDFアップロード", color: "text-cyan-400", bg: "bg-cyan-400/10" },
+];
+
+export default async function Home() {
+  const nextEvent = await prisma.event.findFirst({
+    where: { isNext: true },
+  });
+
+  const recentThreads = await prisma.thread.findMany({
+    take: 3,
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="space-y-6 pb-6">
+      {/* 次回の輪講情報 */}
+      {nextEvent && (
+        <section className="bg-gradient-to-br from-emerald-900/40 to-gray-800 rounded-2xl p-5 border border-emerald-500/20 shadow-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+              <Calendar size={16} /> 次回のゼミ輪講
+            </h2>
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full">予定</span>
+          </div>
+          <p className="text-xl font-bold text-white mb-1">
+            {format(new Date(nextEvent.date), "M月d日(E)", { locale: ja })} {nextEvent.time}
           </p>
+          <p className="text-sm text-gray-300 mb-4">発表担当: <span className="font-medium text-white">{nextEvent.members}</span></p>
+          
+          <div className="bg-gray-900/50 rounded-xl p-3 mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-gray-800 p-2 rounded-lg">
+                <BookOpen size={16} className="text-gray-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">対象</p>
+                <p className="text-sm font-medium text-gray-200">{nextEvent.target}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* クイックアクセス */}
+      <section>
+        <h2 className="text-lg font-bold text-white mb-3 pl-1">メニュー</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {quickLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link key={link.name} href={link.href} className="block group">
+                <div className="bg-gray-800 hover:bg-gray-750 transition border border-gray-700/50 hover:border-gray-600 rounded-xl p-4 h-full flex flex-col justify-between">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${link.bg}`}>
+                    <Icon size={20} className={link.color} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-gray-100 flex items-center justify-between">
+                      {link.name}
+                      <ChevronRight size={14} className="text-gray-500 group-hover:text-gray-300 transition-transform group-hover:translate-x-1" />
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-1">{link.desc}</p>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* 最近のアクティビティ */}
+      <section>
+        <h2 className="text-lg font-bold text-white mb-3 pl-1">最近の質問・投稿</h2>
+        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700/50 space-y-4">
+          {recentThreads.length > 0 ? (
+            recentThreads.map((thread) => (
+              <div key={thread.id} className="flex gap-3 items-start">
+                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold shrink-0">
+                  {thread.author[0]}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-gray-300">
+                    <span className="font-bold text-gray-200">{thread.author}</span> が質問を投稿しました
+                  </p>
+                  <p className="text-sm font-medium text-emerald-400 mt-0.5 truncate">{thread.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">{format(new Date(thread.createdAt), "MM/dd HH:mm", { locale: ja })}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 text-sm py-4">最近のアクティビティはありません</p>
+          )}
         </div>
-      </main>
+      </section>
     </div>
   );
 }

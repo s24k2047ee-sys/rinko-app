@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Book {
+  id          Int       @id @default(autoincrement())
+  title       String
+  author      String
+  publisher   String
+  status      String    @default("未着手")
+  coverColor  String
+  chapters    Chapter[]
+  createdAt   DateTime  @default(now())
+}
+
+model Chapter {
+  id          Int      @id @default(autoincrement())
+  title       String
+  pages       String
+  assignedTo  String
+  completed   Boolean  @default(false)
+  book        Book     @relation(fields: [bookId], references: [id])
+  bookId      Int
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  title     String
+  author    String
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+  tags      String   // Stored as comma-separated string
+  status    String?  @default("未解決")
+  replies   Reply[]
+}
+
+model Reply {
+  id        Int      @id @default(autoincrement())
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+  thread    Thread   @relation(fields: [threadId], references: [id])
+  threadId  Int
+}
+
+model Material {
+  id        Int      @id @default(autoincrement())
+  name      String
+  size      String
+  user      String
+  createdAt DateTime @default(now())
+  type      String
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  time      String
+  location  String
+  members   String   // Comma-separated
+  target    String
+  isNext    Boolean  @default(false)
+}
