@@ -1,8 +1,9 @@
 import prisma from "@/lib/prisma";
 export const dynamic = "force-dynamic";
-import { FileText, Download, UploadCloud, Folder } from "lucide-react";
+import { FileText, Download, Folder } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import AddMaterialForm from "./AddMaterialForm";
 
 export default async function MaterialsPage() {
   const materials = await prisma.material.findMany({
@@ -11,16 +12,7 @@ export default async function MaterialsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="border-2 border-dashed border-gray-700 bg-gray-800/50 rounded-xl p-8 flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-3">
-          <UploadCloud size={24} />
-        </div>
-        <h3 className="font-bold text-gray-200 mb-1">資料をアップロード</h3>
-        <p className="text-xs text-gray-500 mb-4">PDF, Word, PowerPoint形式に対応 (最大10MB)</p>
-        <button className="bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-          ファイルを選択
-        </button>
-      </div>
+      <AddMaterialForm />
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -49,9 +41,19 @@ export default async function MaterialsPage() {
                     <span className="text-[10px] text-gray-500">{format(new Date(file.createdAt), "M月d日", { locale: ja })}</span>
                   </div>
                 </div>
-                <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-700 rounded-full transition shrink-0">
-                  <Download size={16} />
-                </button>
+                {file.fileData ? (
+                  <a 
+                    href={file.fileData} 
+                    download={file.name}
+                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-700 rounded-full transition shrink-0"
+                  >
+                    <Download size={16} />
+                  </a>
+                ) : (
+                  <button className="w-8 h-8 flex items-center justify-center text-gray-400 opacity-50 cursor-not-allowed rounded-full transition shrink-0">
+                    <Download size={16} />
+                  </button>
+                )}
               </div>
             ))
           ) : (

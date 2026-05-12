@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MessageSquare, ThumbsUp, Search, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import AddThreadModal from "./AddThreadModal";
 
 interface Thread {
   id: number;
@@ -21,6 +22,7 @@ interface Thread {
 export default function BoardClient({ initialThreads }: { initialThreads: any[] }) {
   const [activeTab, setActiveTab] = useState("すべて");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredThreads = initialThreads.filter(thread => {
     const tagsArr = thread.tags.split(",");
@@ -47,10 +49,15 @@ export default function BoardClient({ initialThreads }: { initialThreads: any[] 
             className="w-full bg-gray-800 border border-gray-700 text-sm text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-emerald-500 transition-colors"
           />
         </div>
-        <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 rounded-lg flex items-center justify-center transition">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 rounded-lg flex items-center justify-center transition"
+        >
           <Plus size={20} />
         </button>
       </div>
+
+      <AddThreadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {tabs.map(tab => (
