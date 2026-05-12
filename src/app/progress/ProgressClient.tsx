@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Circle, Plus } from "lucide-react";
-import { toggleChapterComplete } from "../actions/progress";
+import { CheckCircle2, Circle, Plus, BookOpen } from "lucide-react";
+import { toggleChapterComplete, setTargetBook } from "../actions/progress";
 import AddChapterModal from "./AddChapterModal";
 
 interface Chapter {
@@ -13,9 +13,28 @@ interface Chapter {
   completed: boolean;
 }
 
-export default function ProgressClient({ initialChapters, bookTitle, bookId }: { initialChapters: Chapter[], bookTitle: string, bookId: number }) {
+export default function ProgressClient({ initialChapters, bookTitle, bookId, allBooks }: { initialChapters: Chapter[], bookTitle: string, bookId: number, allBooks: any[] }) {
   const [chapters, setChapters] = useState(initialChapters);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+
+  const handleBookSwitch = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newBookId = parseInt(e.target.value);
+    if (newBookId === bookId) return;
+    
+    setIsSwitching(true);
+    try {
+      await setTargetBook(newBookId);
+      // Wait a moment for revalidation
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (err) {
+      console.error(err);
+      alert("対象書籍の変更に失敗しました");
+      setIsSwitching(false);
+    }
+  };
 
   const toggleComplete = async (id: number) => {
     const chapter = chapters.find(c => c.id === id);
@@ -42,9 +61,32 @@ export default function ProgressClient({ initialChapters, bookTitle, bookId }: {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gray-800 rounded-xl p-5 border border-gray-700/50">
-        <h2 className="text-sm font-semibold text-gray-400 mb-2">現在の対象書籍</h2>
-        <h1 className="text-lg font-bold text-white mb-4">{bookTitle}</h1>
+      <div className="bg-gray-800 rounded-xl p-5 border border-gray-700/50 relative">
+        {isSwitching && (
+          <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
+            <span className="text-emerald-400 font-bold text-sm">切り替え中...</span>
+          </div>
+        )}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-400 mb-1">現在の対象書籍</h2>
+            <h1 className="text-lg font-bold text-white">{bookTitle}</h1>
+          </div>
+          
+          <div className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
+            <BookOpen size={14} className="text-emerald-400" />
+            <select 
+              value={bookId} 
+              onChange={handleBookSwitch}
+              disabled={isSwitching}
+              className="bg-transparent text-sm text-gray-200 focus:outline-none cursor-pointer"
+            >
+              {allBooks.map(b => (
+                <option key={b.id} value={b.id} className="bg-gray-800">{b.title}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         
         <div className="mb-2 flex justify-between items-end transition-all">
           <span className="text-2xl font-bold text-emerald-400 transition-all">{progressPercent}%</span>

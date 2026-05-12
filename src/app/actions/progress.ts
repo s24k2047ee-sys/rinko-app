@@ -33,3 +33,25 @@ export async function toggleChapterComplete(id: number, completed: boolean) {
     throw new Error("Failed to update chapter");
   }
 }
+
+export async function setTargetBook(bookId: number) {
+  try {
+    // 現在「進行中」のものを「未着手」に戻す（必要であれば）
+    await prisma.book.updateMany({
+      where: { status: "進行中", id: { not: bookId } },
+      data: { status: "未着手" },
+    });
+
+    // 選択された書籍を「進行中」にする
+    await prisma.book.update({
+      where: { id: bookId },
+      data: { status: "進行中" },
+    });
+
+    revalidatePath("/progress");
+    revalidatePath("/books");
+  } catch (error) {
+    console.error("Failed to set target book:", error);
+    throw new Error("Failed to set target book");
+  }
+}
