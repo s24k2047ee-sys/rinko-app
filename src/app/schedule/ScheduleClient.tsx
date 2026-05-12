@@ -1,8 +1,10 @@
 "use client";
 
-import { Calendar as CalendarIcon, Clock, MapPin, User } from "lucide-react";
+import { useState } from "react";
+import { Calendar as CalendarIcon, Clock, MapPin, User, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import AddEventModal from "./AddEventModal";
 
 interface Event {
   id: number;
@@ -15,6 +17,8 @@ interface Event {
 }
 
 export default function ScheduleClient({ events }: { events: Event[] }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 flex items-center justify-between">
@@ -27,7 +31,15 @@ export default function ScheduleClient({ events }: { events: Event[] }) {
             <p className="text-xs text-gray-400">毎週金曜日 3限 (14:40-16:10)</p>
           </div>
         </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95"
+        >
+          <Plus size={20} />
+        </button>
       </div>
+
+      <AddEventModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       <div className="relative border-l border-gray-700 ml-4 space-y-8 pb-4">
         {events.map((item) => (

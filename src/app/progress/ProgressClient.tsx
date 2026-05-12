@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Plus } from "lucide-react";
+import { toggleChapterComplete } from "../actions/progress";
+import AddChapterModal from "./AddChapterModal";
 
 interface Chapter {
   id: number;
@@ -11,16 +13,28 @@ interface Chapter {
   completed: boolean;
 }
 
-export default function ProgressClient({ initialChapters, bookTitle }: { initialChapters: Chapter[], bookTitle: string }) {
+export default function ProgressClient({ initialChapters, bookTitle, bookId }: { initialChapters: Chapter[], bookTitle: string, bookId: number }) {
   const [chapters, setChapters] = useState(initialChapters);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleComplete = async (id: number) => {
+    const chapter = chapters.find(c => c.id === id);
+    if (!chapter) return;
+
     // Optimistic update
     setChapters(chapters.map(ch => 
       ch.id === id ? { ...ch, completed: !ch.completed } : ch
     ));
     
-    // Note: In a real app, you'd call a Server Action here to update the DB
+    try {
+      await toggleChapterComplete(id, !chapter.completed);
+    } catch (e) {
+      console.error(e);
+      // Revert on failure
+      setChapters(chapters.map(ch => 
+        ch.id === id ? { ...ch, completed: chapter.completed } : ch
+      ));
+    }
   };
 
   const totalCompleted = chapters.filter(c => c.completed).length;
@@ -41,8 +55,19 @@ export default function ProgressClient({ initialChapters, bookTitle }: { initial
         </div>
       </div>
 
+      <AddChapterModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} bookId={bookId} />
+
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-gray-300 pl-1">担当範囲と進捗</h3>
+        <div className="flex justify-between items-center pl-1">
+          <h3 className="text-sm font-bold text-gray-300">担当範囲と進捗</h3>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            <Plus size={14} />
+            <span>章を追加</span>
+          </button>
+        </div>
         {chapters.map((chapter) => (
           <div key={chapter.id} className="bg-gray-800 rounded-xl p-4 flex items-center gap-4 border border-gray-700/30 transition-all hover:border-gray-600">
             <button 

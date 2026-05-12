@@ -12,5 +12,5 @@ export default async function ProgressPage() {
     return <div className="text-center py-20 text-gray-500">進行中の書籍が見つかりません</div>;
   }
 
-  return <ProgressClient initialChapters={book.chapters} bookTitle={book.title} />;
+  return <ProgressClient initialChapters={book.chapters} bookTitle={book.title} bookId={book.id} />;
 }
